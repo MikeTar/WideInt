@@ -15,9 +15,9 @@ vector<unsigned long> set_num(vector<T>& num)
 
     for(int N = 0; N < num.size(); N++)
     {
-        for(int B = 0; B < sizeof(T); B++)
+        for(int B = 0; B < sizeof(T); B+=4)
         {
-            T n = num[N] >> B*8*sizeof(unsigned long);
+            T n = num[N] >> B*8;
             bitset<32> bnum(n);
             slnum.push_back(bnum.to_ulong());
        }
