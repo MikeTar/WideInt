@@ -21,8 +21,7 @@ vector<bitset<8>> set_num(vector<T>& num)
         {
             T n = num[N] >> B*8;
             bitset<8> bnum(n);
-            //if(bnum.to_ulong() != 0)
-                slnum.push_back(bnum);
+            slnum.push_back(bnum);
        }
     }
     return slnum;
