@@ -180,61 +180,61 @@ bool wnum1::isNAN()
 	return res;
 }
 
-wnum1 add(wnum1 wnumin1, wnum1 wnumin2)
+wnum1 add(wnum1 term1, wnum1 term2)
 {
 	int sz;
 	wnum1 res;
 	bool carry = 0;
 
-	if (wnumin1.SF & wnumin2.SF)
+	if (term1.SF & term2.SF)
 	{
-		wnumin1.SF = wnumin2.SF = 0;
+		term1.SF = term2.SF = 0;
 		res.SF = 1;
 	}
 
-	if (wnumin1.bwnum.size() > wnumin2.bwnum.size())
+	if (term1.bwnum.size() > term2.bwnum.size())
 	{
-		if (wnumin1.SF)
-			wnumin1.altcode();
-		sz = (int)wnumin1.bwnum.size();
-		wnumin2.bwnum.resize(sz);
-		if (wnumin2.SF)
-			wnumin2.altcode();
+		if (term1.SF)
+			term1.altcode();
+		sz = (int)term1.bwnum.size();
+		term2.bwnum.resize(sz);
+		if (term2.SF)
+			term2.altcode();
 	}
 	else
 	{
-		if (wnumin2.SF)
-			wnumin2.altcode();
-		sz = (int)wnumin2.bwnum.size();
-		wnumin1.bwnum.resize(sz);
-		if (wnumin1.SF)
-			wnumin1.altcode();
+		if (term2.SF)
+			term2.altcode();
+		sz = (int)term2.bwnum.size();
+		term1.bwnum.resize(sz);
+		if (term1.SF)
+			term1.altcode();
 	}
 
 	res.bwnum.resize(sz);
 	for (int i = 0; i < sz; i++)
 	{
-		res.bwnum[i] = wnumin1.bwnum[i] ^ wnumin2.bwnum[i] ^ carry;
-		carry = ((wnumin1.bwnum[i] | wnumin2.bwnum[i]) & carry) | (wnumin1.bwnum[i] & wnumin2.bwnum[i]) ? 1 : 0;
-		if((i == sz-1) && (wnumin1.SF | wnumin2.SF)) res.SF = wnumin1.SF ^ wnumin2.SF ^ carry;
+		res.bwnum[i] = term1.bwnum[i] ^ term2.bwnum[i] ^ carry;
+		carry = ((term1.bwnum[i] | term2.bwnum[i]) & carry) | (term1.bwnum[i] & term2.bwnum[i]) ? 1 : 0;
+		if((i == sz-1) && (term1.SF | term2.SF)) res.SF = term1.SF ^ term2.SF ^ carry;
 	}
-	if (carry & !wnumin1.SF &  !wnumin2.SF)
+	if (carry & !term1.SF &  !term2.SF)
 	{
 		res.bwnum.push_back(carry);
 		carry = 0;
 		res.NoD = (int)res.bwnum.size();
 	}
-	if (res.SF & (wnumin1.SF ^ wnumin2.SF))
+	if (res.SF & (term1.SF ^ term2.SF))
 		res.altcode();
 	res.resize();
 	return res;
 }
 
-wnum1 sub(wnum1 wnumin1, wnum1 wnumin2)
+wnum1 sub(wnum1 minuend, wnum1 subtrahend)
 {
 	wnum1 res;
-	wnumin2.negate();
-	res = add(wnumin1, /*tmp*/wnumin2);
+	subtrahend.negate();
+	res = add(minuend, subtrahend);
 	res.resize();
 	return res;
 }
@@ -250,8 +250,8 @@ wnum1 mul(wnum1 wnumin1, wnum1 wnumin2)
 
 	if (wnumin1.bwnum.size() > wnumin2.bwnum.size())
 	{
-		tmp[0] = wnumin2; // множитель
-		tmp[1] = wnumin1; // множимое
+		tmp[0] = wnumin2; // multiplier
+		tmp[1] = wnumin1; // multiplicand
 	}
 	else
 	{
@@ -273,7 +273,7 @@ wnum1 mul(wnum1 wnumin1, wnum1 wnumin2)
 
 wnum1 div(wnum1 dividend, wnum1 divisor)
 {
-	wnum1 quotient, remainder/*, compl_divr*/;
+	wnum1 quotient, remainder;
 	int k= dividend.NoD - divisor.NoD;
 
 	if (dividend.SF ^ divisor.SF)
@@ -285,9 +285,6 @@ wnum1 div(wnum1 dividend, wnum1 divisor)
 	{
 		quotient.bwnum.resize(k + 1);
 		divisor.Lsh(k);
-		//compl_divr = divisor;
-		//compl_divr.negate();
-		//compl_divr.altcode();
 		remainder = sub(dividend, divisor);
 		quotient.bwnum[k] = !remainder.SF;
 		for (int i = 1; i < k+1; i++)
