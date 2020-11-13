@@ -11,6 +11,15 @@ bool zero(char[], int);
 
 boost::dynamic_bitset<> wide;
 
+enum num_sys
+{
+	bin = 2,
+	oct = 8,
+	dec = 10,
+	hex = 16
+};
+
+
 struct wnum1
 {
 	int NoD;
@@ -21,7 +30,7 @@ struct wnum1
 	void negate();
 	void altcode();
 	void inc();
-	string wn_to_str();
+	string to_str(num_sys);
 	//string to_str_10();
 	void resize();
 	void Lsh(int);
@@ -29,6 +38,10 @@ struct wnum1
 	bool ZF = false, SF = false;
 	bool isNAN();
 };
+
+wnum1 rem;
+wnum1 div(wnum1, wnum1);
+
 
 void wnum1::set_num(char num[], int n)
 {
@@ -73,12 +86,19 @@ void wnum1::set_num(wnum1& wn)
 
 void wnum1:: set_num(int num)
 {
-	vector<bool> tmp(sizeof(num));
-	NoD = sizeof(num);
-	for (int i = 0; i < sizeof(num) - 1; i++) tmp[i] = (bool)((num >> i) & 1);
-	int i = sizeof(num) - 1;
-	while (tmp[i] != 1) { --NoD; --i; }
-	tmp.resize(--NoD);
+	int sz = sizeof(num) * 8;
+	vector<bool> tmp(sz);
+	NoD = sz;
+	if (num < 0)
+	{
+		SF = 1;
+		num = -num;
+	}
+
+	int j = sz - 1;
+	for (int i = 0; i < j - 1; i++) tmp[i] = (bool)((num >> i) & 1);
+	while (tmp[j] != 1) { --NoD; --j; }
+	tmp.resize(NoD);
 	bwnum = tmp;
 	
 }
@@ -117,32 +137,66 @@ void wnum1::inc()
 	bwnum = res;
 }
 
-string wnum1::wn_to_str()
+string wnum1::to_str(num_sys divr)
 {
+	char ch;
 	string ns;
+	wnum1 divrin, quot;
 
-	if (SF)	ns += ')';
-	int i = 0;
-	int prev_i = i;
-	for (auto v : bwnum)
+	quot.bwnum = bwnum;
+	quot.SF = SF;
+	quot.NoD = NoD;
+
+
+	switch (divr)
 	{
-		ns += (char)v + '0';
-		if ((i - prev_i) == 3)
+	case 10:
+		if (SF)	ns += ')';
+		divrin.set_num(divr);
+		while(!quot.ZF)
 		{
-			ns += ' ';
-			prev_i = i + 1;
+			ch = 0;
+			quot = div(quot, divrin);
+			quot.ZF = (quot.NoD == 1) && (quot.bwnum[0] == 0);
+			rem.ZF = (rem.NoD == 1) && (rem.bwnum[0] == 0);
+			if (!rem.ZF)
+			{
+				for (int i = rem.NoD - 1; i >= 0; i--)
+					ch = (ch | rem.bwnum[i]) << 1;
+				ch >>= 1;
+				ns = (char)(ch + '0') + ns;
+			}
+			else ns = (char)(ch + '0') + ns;
 		}
-		++i;
+		if (SF) ns = (char)('(')+((char)('-') + ns);
+		break;
+	default:
+		break;
 	}
-	if (SF) ns = (ns + '-') + '(';
 
-	int NoD = (int)ns.size() - 1;
-	for (int i = 0; i < (int)ns.size() / 2; i++)
-	{
-		char buf = ns[i];
-		ns[i] = ns[NoD - i];
-		ns[NoD - i] = buf;
-	}
+
+	//if (SF)	ns += ')';
+	//int i = 0;
+	//int prev_i = i;
+	//for (auto v : bwnum)
+	//{
+	//	ns += (char)v + '0';
+	//	if ((i - prev_i) == 3)
+	//	{
+	//		ns += ' ';
+	//		prev_i = i + 1;
+	//	}
+	//	++i;
+	//}
+	//if (SF) ns = (ns + '-') + '(';
+
+	//int NoD = (int)ns.size() - 1;
+	//for (int i = 0; i < (int)ns.size() / 2; i++)
+	//{
+	//	char buf = ns[i];
+	//	ns[i] = ns[NoD - i];
+	//	ns[NoD - i] = buf;
+	//}
 
 	return ns;
 }
@@ -296,6 +350,13 @@ wnum1 div(wnum1 dividend, wnum1 divisor)
 				remainder = add(remainder, divisor);
 			quotient.bwnum[k-i] = !remainder.SF;
 		}
+
+		if (remainder.SF)
+		{
+			remainder = add(remainder, divisor);
+		}
+		if(((int)remainder.bwnum.size() - k) > 0)
+			remainder.Rsh(k);
 	}
 	else
 	{
@@ -303,7 +364,19 @@ wnum1 div(wnum1 dividend, wnum1 divisor)
 		quotient.bwnum.push_back(0);
 	}
 
+	if (!remainder.isNAN() && remainder.NoD < 0) remainder.NoD = (int)remainder.bwnum.size();
+	remainder.resize();
+	rem = remainder;
+
 	if(!quotient.isNAN() && quotient.NoD < 0) quotient.NoD = (int)quotient.bwnum.size();
 	quotient.resize();
+
 	return quotient;
 } 
+
+wnum1 mod(wnum1 divd, wnum1 divr)
+{
+	wnum1 quot;
+	quot = div(divd, divr);
+	return rem;
+}
