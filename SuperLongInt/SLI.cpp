@@ -25,9 +25,8 @@ struct wnum1
 	void set_num(char[], int);
 	void set_num(wnum1&);
 	void set_num(int);
-	void complementary(wnum1);
-	void complementary();
-	void add(vector<bool>);
+	void negate();
+	void inc();
 	string wn_to_str();
 	//string to_str_10();
 	void resize();
@@ -40,40 +39,57 @@ struct wnum1
 wnum1 sub(wnum1, wnum1);
 wnum1 add(wnum1, wnum1);
 wnum1 mul(wnum1, wnum1);
+wnum1 div(wnum1, wnum1);
 
 int main()
 {
 	string e;
 
 	bool CF = 0;
-//	wnum a, b, res;
 	wnum1 c, d, res1;
+	cout << "First number value " << endl;
 	int n = input(num_str);
-//	a.set_num(num_str, n);
-
-//	n = input(num_str);
-//	b.set_num(num_str, n);
-
-//	n = input(num_str);
 	c.set_num(num_str, n);
+	cout << "Length of number " << c.wn_to_str() << " is " << c.NoD << " bit" << endl;
+	c.negate();
+	cout << "Negate of number is  " << c.wn_to_str() << endl;
+	c.negate();
+	cout << "Negate of number again is  " << c.wn_to_str() << endl;
+	cout << endl;
+
+	cout << "Second number value " << endl;
 	n = input(num_str);
 	d.set_num(num_str, n);
+	cout << "Length of number " << d.wn_to_str() << " is " << d.NoD << " bit" << endl;
+	d.negate();
+	cout << "Negate of number is  " << d.wn_to_str() << endl;
+	d.negate();
+	cout << "Negate of number again is  " << d.wn_to_str() << endl;
+	cout << endl;
 
+	cout << "Summation of numbers " << endl;
 	res1 = add(c, d);
 	cout << c.wn_to_str() << " + " << d.wn_to_str()  << " = " << res1.wn_to_str() << endl;
+	cout << "Length of summ " << res1.wn_to_str() << " is " << res1.NoD << " bit" << endl;
+	cout << endl;
 
+	cout << "Subtraction of numbers " << endl;
 	res1 = sub(c, d);
 	cout << c.wn_to_str() << " - " << d.wn_to_str()  << " = " << res1.wn_to_str() << endl;
+	cout << "Length of subtract " << res1.wn_to_str() << " is " << res1.NoD << " bit" << endl;
+	cout << endl;
 
+	cout << "Multiplication of numbers " << endl;
 	res1 = mul(c, d);
 	cout << c.wn_to_str() << " * " << d.wn_to_str()  << " = " << res1.wn_to_str() << endl;
-	cout <<"Length of number " << c.wn_to_str() << " is " << c.wn_to_str().size() << " bit" << endl;
+	cout << "Length of product " << res1.wn_to_str() << " is " << res1.NoD << " bit" << endl;
+	cout << endl;
 
-	//res = addwc(a, b, CF);
-	//cout << a.bwnum << " + " << b.bwnum << " = " << res.bwnum << " with CF = " << CF << endl;
-	//res = sub(a, b);
-	//cout << a.bwnum << " - " << b.bwnum << " = " << res.bwnum << endl;
-
+	cout << "Division of numbers " << endl;
+	res1 = div(c, d);
+	cout << c.wn_to_str() << " / " << d.wn_to_str()  << " = " << res1.wn_to_str() << endl;
+	cout << "Length of quotient " << res1.wn_to_str() << " is " << res1.NoD << " bit" << endl;
+	cout << endl;
 
 	cin >> e;
 	return 0;

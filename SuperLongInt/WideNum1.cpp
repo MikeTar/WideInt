@@ -2,11 +2,14 @@
 #include <vector>
 #include <bitset>
 #include <cmath>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 
 using namespace std;
 
 bool zero(char[], int);
+
+boost::dynamic_bitset<> wide;
 
 struct wnum1
 {
@@ -16,6 +19,7 @@ struct wnum1
 	void set_num(wnum1&);
 	void set_num(int);
 	void negate();
+	void altcode();
 	void inc();
 	string wn_to_str();
 	//string to_str_10();
@@ -23,6 +27,7 @@ struct wnum1
 	void Lsh(int);
 	void Rsh(int);
 	bool ZF = false, SF = false;
+	bool isNAN();
 };
 
 void wnum1::set_num(char num[], int n)
@@ -57,7 +62,7 @@ void wnum1::set_num(char num[], int n)
 	
 	if(num[0] == '-')
 		negate();
-	NoD = bwnum.size();
+	NoD = (int)bwnum.size();
 }
 
 void wnum1::set_num(wnum1& wn)
@@ -80,15 +85,18 @@ void wnum1:: set_num(int num)
 
 void wnum1::negate()
 {
-	vector<bool> ;
-	bwnum.flip();
 	SF = !SF;
+}
+
+void wnum1::altcode()
+{
+	bwnum.flip();
 	inc();
 }
 
 void wnum1::inc()
 {
-	int sz = bwnum.size();
+	int sz = (int)bwnum.size();
 	vector<bool> res, tmp;
 	bool carry = 0;
 
@@ -113,15 +121,22 @@ string wnum1::wn_to_str()
 {
 	string ns;
 
-	if (SF)
+	if (SF)	ns += ')';
+	int i = 0;
+	int prev_i = i;
+	for (auto v : bwnum)
 	{
-		ns = '-';
-		negate();
+		ns += (char)v + '0';
+		if ((i - prev_i) == 3)
+		{
+			ns += ' ';
+			prev_i = i + 1;
+		}
+		++i;
 	}
+	if (SF) ns = (ns + '-') + '(';
 
-	for (auto v : bwnum) ns += (char)v + '0';
-
-	int NoD = ns.size() - 1;
+	int NoD = (int)ns.size() - 1;
 	for (int i = 0; i < (int)ns.size() / 2; i++)
 	{
 		char buf = ns[i];
@@ -134,7 +149,7 @@ string wnum1::wn_to_str()
 
 void wnum1::resize()
 {
-	NoD = bwnum.size();
+	NoD = (int)bwnum.size();
 	int i = NoD - 1;
 	while ((i > 0) && !bwnum[i]){--NoD; --i;}
 	ZF = i ? 0 : 1;
@@ -146,7 +161,7 @@ void wnum1::Lsh(int n)
 	if (!n) return;
 	vector<bool> tmp;
 	tmp.resize(bwnum.size()+(size_t)n);
-	for (int i = n; i < tmp.size(); i++) tmp[i] = bwnum[i - n];
+	for (int i = n; i < (int)tmp.size(); i++) tmp[i] = bwnum[i - n];
 	bwnum = tmp;
 }
 
@@ -155,8 +170,14 @@ void wnum1::Rsh(int n)
 	if (!n) return;
 	vector<bool> tmp;
 	tmp.resize(bwnum.size() - (size_t)n);
-	for (int i = 0; i < tmp.size(); i++) tmp[i] = bwnum[i + n];
+	for (int i = 0; i < (int)tmp.size(); i++) tmp[i] = bwnum[i + n];
 	bwnum = tmp;
+}
+
+bool wnum1::isNAN()
+{
+	bool res = !(bwnum.size());
+	return res;
 }
 
 wnum1 add(wnum1 wnumin1, wnum1 wnumin2)
@@ -164,21 +185,30 @@ wnum1 add(wnum1 wnumin1, wnum1 wnumin2)
 	int sz;
 	wnum1 res;
 	bool carry = 0;
+
+	if (wnumin1.SF & wnumin2.SF)
+	{
+		wnumin1.SF = wnumin2.SF = 0;
+		res.SF = 1;
+	}
+
 	if (wnumin1.bwnum.size() > wnumin2.bwnum.size())
 	{
-		sz = wnumin1.bwnum.size();
+		if (wnumin1.SF)
+			wnumin1.altcode();
+		sz = (int)wnumin1.bwnum.size();
+		wnumin2.bwnum.resize(sz);
 		if (wnumin2.SF)
-			wnumin2.bwnum.resize(sz, 1);
-		else
-			wnumin2.bwnum.resize(sz);
+			wnumin2.altcode();
 	}
 	else
 	{
-		sz = wnumin2.bwnum.size();
+		if (wnumin2.SF)
+			wnumin2.altcode();
+		sz = (int)wnumin2.bwnum.size();
+		wnumin1.bwnum.resize(sz);
 		if (wnumin1.SF)
-			wnumin1.bwnum.resize(sz, 1);
-		else
-			wnumin1.bwnum.resize(sz);
+			wnumin1.altcode();
 	}
 
 	res.bwnum.resize(sz);
@@ -186,32 +216,37 @@ wnum1 add(wnum1 wnumin1, wnum1 wnumin2)
 	{
 		res.bwnum[i] = wnumin1.bwnum[i] ^ wnumin2.bwnum[i] ^ carry;
 		carry = ((wnumin1.bwnum[i] | wnumin2.bwnum[i]) & carry) | (wnumin1.bwnum[i] & wnumin2.bwnum[i]) ? 1 : 0;
-		if(i == sz-1) res.SF = wnumin1.SF ^ wnumin2.SF ^ carry;
+		if((i == sz-1) && (wnumin1.SF | wnumin2.SF)) res.SF = wnumin1.SF ^ wnumin2.SF ^ carry;
 	}
-	if (carry)
+	if (carry & !wnumin1.SF &  !wnumin2.SF)
 	{
 		res.bwnum.push_back(carry);
 		carry = 0;
-		res.NoD = res.bwnum.size();
+		res.NoD = (int)res.bwnum.size();
 	}
+	if (res.SF & (wnumin1.SF ^ wnumin2.SF))
+		res.altcode();
 	res.resize();
 	return res;
 }
 
 wnum1 sub(wnum1 wnumin1, wnum1 wnumin2)
 {
-	wnum1 res/*, tmp*/;
-	//if (wnumin2.bwnum.size() < wnumin1.bwnum.size()) tmp.bwnum.resize(wnumin1.bwnum.size());
+	wnum1 res;
 	wnumin2.negate();
 	res = add(wnumin1, /*tmp*/wnumin2);
-	//res.bwnum.resize(res.bwnum.size() - 1);
 	res.resize();
 	return res;
 }
 
 wnum1 mul(wnum1 wnumin1, wnum1 wnumin2)
 {
-	wnum1 sum, tmp[2];
+	wnum1 product, tmp[2];
+
+	if (wnumin1.SF ^ wnumin2.SF)
+		product.SF = 1;
+
+	wnumin1.SF = wnumin2.SF = 0;
 
 	if (wnumin1.bwnum.size() > wnumin2.bwnum.size())
 	{
@@ -224,27 +259,54 @@ wnum1 mul(wnum1 wnumin1, wnum1 wnumin2)
 		tmp[1] = wnumin2;
 	}
 
-	for (int i = 0; i < tmp[0].bwnum.size(); i++)
+	for (int i = 0; i < (int)tmp[0].bwnum.size(); i++)
 	{
 		if (tmp[0].bwnum[i])
 		{
-			sum = add(sum, tmp[1]);
+			product = add(product, tmp[1]);
 		}
 		tmp[1].Lsh(1);
 	}
 
-	return sum;
+	return product;
 }
 
-//wnum1 div(wnum1 dividend, wnum1 divisor)
-//{
-//	wnum1 quotient, compl_divr;
-//	int k;
-//	if (dividend.NoD > divisor.NoD)
-//	{
-//		k = dividend.NoD - divisor.NoD;
-//		divisor.Lsh(k);
-//		compl_divr.complementary(divisor);
-//	}
-//
-//}
+wnum1 div(wnum1 dividend, wnum1 divisor)
+{
+	wnum1 quotient, remainder/*, compl_divr*/;
+	int k= dividend.NoD - divisor.NoD;
+
+	if (dividend.SF ^ divisor.SF)
+		quotient.SF = 1;
+	
+	dividend.SF = divisor.SF = 0;
+
+	if (k >= 0)
+	{
+		quotient.bwnum.resize(k + 1);
+		divisor.Lsh(k);
+		//compl_divr = divisor;
+		//compl_divr.negate();
+		//compl_divr.altcode();
+		remainder = sub(dividend, divisor);
+		quotient.bwnum[k] = !remainder.SF;
+		for (int i = 1; i < k+1; i++)
+		{
+			remainder.Lsh(1);
+			if (!remainder.SF)
+				remainder = sub(remainder, divisor);
+			else
+				remainder = add(remainder, divisor);
+			quotient.bwnum[k-i] = !remainder.SF;
+		}
+	}
+	else
+	{
+		remainder = dividend;
+		quotient.bwnum.push_back(0);
+	}
+
+	if(!quotient.isNAN() && quotient.NoD < 0) quotient.NoD = (int)quotient.bwnum.size();
+	quotient.resize();
+	return quotient;
+} 
