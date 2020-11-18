@@ -1,15 +1,11 @@
 #include <iostream>
 #include <vector>
-#include <bitset>
-#include <cmath>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <string>
 
 
 using namespace std;
 
 bool zero(char[], int);
-
-boost::dynamic_bitset<> wide;
 
 enum num_sys
 {
@@ -33,14 +29,17 @@ struct wnum1
 	string to_str(num_sys);
 	//string to_str_10();
 	void resize();
-	void Lsh(int);
-	void Rsh(int);
+	void _Lsh(uint32_t);
+	wnum1 Lsh(uint32_t);
+	void _Rsh(uint32_t);
+	wnum1 Rsh(uint32_t);
 	bool ZF = false, SF = false;
 	bool isNAN();
 };
 
 wnum1 rem;
 wnum1 div(wnum1, wnum1);
+wnum1 ndiv(wnum1, wnum1);
 
 
 void wnum1::set_num(char num[], int n)
@@ -150,6 +149,34 @@ string wnum1::to_str(num_sys divr)
 
 	switch (divr)
 	{
+	case 2:
+		if (SF)	ns += ')';
+		for (auto v : bwnum)
+			ns = (char)(v + '0') + ns;
+		if (SF) ns = (char)('(') + ((char)('-') + ns);
+		ns = 'b' + ns;
+		break;
+
+	case 8:
+		if (SF)	ns += ')';
+		divrin.set_num(divr);
+		while(!quot.ZF)
+		{
+			ch = 0;
+			quot = div(quot, divrin);
+			if (!rem.ZF)
+			{
+				for (int i = rem.NoD - 1; i >= 0; i--)
+					ch = (ch | rem.bwnum[i]) << 1;
+				ch >>= 1;
+				ns = (char)(ch + '0') + ns;
+			}
+			else ns = (char)(ch + '0') + ns;
+		}
+		if (SF) ns = (char)('(')+((char)('-') + ns);
+		ns = '0' + ns;
+		break;
+
 	case 10:
 		if (SF)	ns += ')';
 		divrin.set_num(divr);
@@ -157,8 +184,6 @@ string wnum1::to_str(num_sys divr)
 		{
 			ch = 0;
 			quot = div(quot, divrin);
-			quot.ZF = (quot.NoD == 1) && (quot.bwnum[0] == 0);
-			rem.ZF = (rem.NoD == 1) && (rem.bwnum[0] == 0);
 			if (!rem.ZF)
 			{
 				for (int i = rem.NoD - 1; i >= 0; i--)
@@ -170,6 +195,31 @@ string wnum1::to_str(num_sys divr)
 		}
 		if (SF) ns = (char)('(')+((char)('-') + ns);
 		break;
+
+	case 16:
+		if (SF)	ns += ')';
+		divrin.set_num(divr);
+		while (!quot.ZF)
+		{
+			ch = 0;
+			quot = div(quot, divrin);
+			if (!rem.ZF)
+			{
+				for (int i = rem.NoD - 1; i >= 0; i--)
+					ch = (ch | rem.bwnum[i]) << 1;
+				ch >>= 1;
+				if (ch >= 10)
+					ch = (ch - 10) + 'A';
+				else
+					ch += '0';
+				ns = (char)ch + ns;
+			}
+			else ns = (char)(ch + '0') + ns;
+		}
+		if (SF) ns = (char)('(') + ((char)('-') + ns);
+		ns = '0' + ('x' + ns);
+		break;
+
 	default:
 		break;
 	}
@@ -206,11 +256,11 @@ void wnum1::resize()
 	NoD = (int)bwnum.size();
 	int i = NoD - 1;
 	while ((i > 0) && !bwnum[i]){--NoD; --i;}
-	ZF = i ? 0 : 1;
+	ZF = (i || bwnum[0]) ? 0 : 1;
 	bwnum.resize(NoD);
 }
 
-void wnum1::Lsh(int n)
+void wnum1::_Lsh(uint32_t n)
 {
 	if (!n) return;
 	vector<bool> tmp;
@@ -219,7 +269,19 @@ void wnum1::Lsh(int n)
 	bwnum = tmp;
 }
 
-void wnum1::Rsh(int n)
+wnum1 wnum1::Lsh(uint32_t n)
+{
+	wnum1 tmp;
+	tmp.bwnum = bwnum;
+	if (!n) return tmp;
+	tmp.bwnum.clear();
+	tmp.bwnum.resize(bwnum.size() + (size_t)n);
+	for (int i = n; i < (int)tmp.bwnum.size(); i++) tmp.bwnum[i] = bwnum[i - n];
+	//bwnum = tmp;
+	return tmp;
+}
+
+void wnum1::_Rsh(uint32_t n)
 {
 	if (!n) return;
 	vector<bool> tmp;
@@ -228,9 +290,21 @@ void wnum1::Rsh(int n)
 	bwnum = tmp;
 }
 
+wnum1 wnum1::Rsh(uint32_t n)
+{
+	wnum1 tmp;
+	tmp.bwnum = bwnum;
+	if (!n) return tmp;
+	tmp.bwnum.clear();
+	tmp.bwnum.resize(bwnum.size() - (size_t)n);
+	for (int i = 0; i < (int)tmp.bwnum.size(); i++) tmp.bwnum[i] = bwnum[i + n];
+	//bwnum = tmp;
+	return tmp;
+}
+
 bool wnum1::isNAN()
 {
-	bool res = !(bwnum.size());
+	bool res = bwnum.empty(); /*!(bwnum.size())*/;
 	return res;
 }
 
@@ -296,9 +370,10 @@ wnum1 sub(wnum1 minuend, wnum1 subtrahend)
 wnum1 mul(wnum1 wnumin1, wnum1 wnumin2)
 {
 	wnum1 product, tmp[2];
+	bool SF = 0;
 
 	if (wnumin1.SF ^ wnumin2.SF)
-		product.SF = 1;
+		SF = 1;
 
 	wnumin1.SF = wnumin2.SF = 0;
 
@@ -319,31 +394,34 @@ wnum1 mul(wnum1 wnumin1, wnum1 wnumin2)
 		{
 			product = add(product, tmp[1]);
 		}
-		tmp[1].Lsh(1);
+		tmp[1]._Lsh(1);
 	}
 
+	product.SF = SF;
 	return product;
 }
 
 wnum1 div(wnum1 dividend, wnum1 divisor)
 {
 	wnum1 quotient, remainder;
+
 	int k= dividend.NoD - divisor.NoD;
 
+	bool SF = false;
 	if (dividend.SF ^ divisor.SF)
-		quotient.SF = 1;
+		SF = 1;
 	
 	dividend.SF = divisor.SF = 0;
 
 	if (k >= 0)
 	{
 		quotient.bwnum.resize(k + 1);
-		divisor.Lsh(k);
+		divisor._Lsh(k);
 		remainder = sub(dividend, divisor);
 		quotient.bwnum[k] = !remainder.SF;
 		for (int i = 1; i < k+1; i++)
 		{
-			remainder.Lsh(1);
+			remainder._Lsh(1);
 			if (!remainder.SF)
 				remainder = sub(remainder, divisor);
 			else
@@ -356,7 +434,7 @@ wnum1 div(wnum1 dividend, wnum1 divisor)
 			remainder = add(remainder, divisor);
 		}
 		if(((int)remainder.bwnum.size() - k) > 0)
-			remainder.Rsh(k);
+			remainder._Rsh(k);
 	}
 	else
 	{
@@ -371,8 +449,96 @@ wnum1 div(wnum1 dividend, wnum1 divisor)
 	if(!quotient.isNAN() && quotient.NoD < 0) quotient.NoD = (int)quotient.bwnum.size();
 	quotient.resize();
 
+	quotient.SF = SF;
 	return quotient;
 } 
+
+wnum1 ndiv(wnum1 dividend, wnum1 divisor)
+{
+	wnum1 quotient, remainder;
+	wnum1 q, r/*, rqq*/;
+	wnum1 lq, rq/*, qq*/;
+
+	wnum1 one;
+	one.bwnum.resize(1, 1);
+	//tmp[0] = tmp[1] = one;
+
+	int k = dividend.NoD - divisor.NoD;
+
+	bool SF = 0;
+	if (dividend.SF ^ divisor.SF)
+		SF = 1;
+
+	dividend.SF = divisor.SF = 0;
+	wnum1 divd = dividend;
+	wnum1 divr = divisor;
+
+	if (k >= 0)
+	{
+		divr._Lsh(k);
+		wnum1 end = sub(divr, divd);
+		while (end.SF)
+		{
+			divr._Lsh(1);
+			++k;
+			end = sub(divr, divd);
+		}
+
+		if (k > 0)
+		{
+			lq = one.Lsh(k + 1);
+			rq = one.Lsh(k - 1);
+			//rq = 1 << (k - 1);
+
+			wnum1 stop;
+			stop.SF = false;
+			do
+			{
+				q = (add(lq, rq)).Rsh(1);
+				//qq = (lq + rq)*2/3 /*>> (1)*/;
+				//q.set_num(qq);
+				divd = mul(divisor, q);
+				r = sub(dividend, divd);
+				if (!r.SF)
+					stop = sub(r, divisor);
+				//rqq.set_num(rq);
+				wnum1 zero = sub(q, rq);
+
+				if (r.SF && !stop.SF && !zero.ZF)
+					lq = q;
+				else if (!r.SF && !stop.SF && !zero.ZF)
+					rq = q;
+				else
+				{
+					quotient = q;
+					rem = remainder = r;
+					break;
+				}
+			} while (true);
+		}
+		else
+		{
+			quotient.set_num(1);
+			rem = remainder = sub(dividend, divisor);
+		}
+
+	}
+	else
+	{
+		remainder = dividend;
+		quotient.bwnum.push_back(0);
+	}
+
+	if (!remainder.isNAN() && remainder.NoD < 0) remainder.NoD = (int)remainder.bwnum.size();
+	remainder.resize();
+	rem = remainder;
+
+	if (!quotient.isNAN() && quotient.NoD < 0) quotient.NoD = (int)quotient.bwnum.size();
+	quotient.resize();
+
+	quotient.SF = SF;
+	return quotient;
+}
 
 wnum1 mod(wnum1 divd, wnum1 divr)
 {

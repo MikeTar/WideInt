@@ -1,10 +1,36 @@
 #include <iostream>
-#include <string>
 #include <vector>
-#include <bitset>
-//#include <cstdlib>
+#include <string>
+#include <ctime>
+#include <cstdio>
+#include <chrono> // дл€ функций из std::chrono
 
 using namespace std;
+
+class Timer
+{
+private:
+	// ѕсевдонимы типов используютс€ дл€ удобного доступа к вложенным типам
+	using clock_t = std::chrono::high_resolution_clock;
+	using second_t = std::chrono::duration<double, std::ratio<1> >;
+
+	std::chrono::time_point<clock_t> m_beg;
+
+public:
+	Timer() : m_beg(clock_t::now())
+	{
+	}
+
+	void reset()
+	{
+		m_beg = clock_t::now();
+	}
+
+	double elapsed() const
+	{
+		return std::chrono::duration_cast<second_t>(clock_t::now() - m_beg).count();
+	}
+};
 
 char num_str[100];
 int input(char[]);
@@ -34,12 +60,17 @@ struct wnum1
 	void set_num(wnum1&);
 	void set_num(int);
 	void negate();
+	void altcode();
 	void inc();
 	string to_str(num_sys);
+	//string to_str_10();
 	void resize();
-	void Lsh(int);
-	void Rsh(int);
+	void _Lsh(uint32_t);
+	wnum1 Lsh(uint32_t);
+	void _Rsh(uint32_t);
+	wnum1 Rsh(uint32_t);
 	bool ZF = false, SF = false;
+	bool isNAN();
 };
 
 //wnum addwc(wnum&, wnum&, bool&);
@@ -47,6 +78,7 @@ wnum1 sub(wnum1, wnum1);
 wnum1 add(wnum1, wnum1);
 wnum1 mul(wnum1, wnum1);
 wnum1 div(wnum1, wnum1);
+wnum1 ndiv(wnum1, wnum1);
 wnum1 mod(wnum1, wnum1);
 
 int main()
@@ -58,53 +90,57 @@ int main()
 	cout << "First number value " << endl;
 	int n = input(num_str);
 	c.set_num(num_str, n);
-	cout << "Length of number " << c.to_str(num_sys::dec) << " is " << c.NoD << " bit" << endl;
+	cout << "Length of number " << c.to_str(num_sys::bin) << " is " << c.NoD << " bit" << endl;	//num_sys::dec
 	c.negate();
-	cout << "Negate of number is  " << c.to_str(num_sys::dec) << endl;
+	cout << "Negate of number is  " << c.to_str(num_sys::oct) << endl;
 	c.negate();
-	cout << "Negate of number again is  " << c.to_str(num_sys::dec) << endl;
+	cout << "Negate of number again is  " << c.to_str(num_sys::hex) << endl;
 	cout << endl;
 
 	cout << "Second number value " << endl;
 	n = input(num_str);
 	d.set_num(num_str, n);
-	cout << "Length of number " << d.to_str(num_sys::dec) << " is " << d.NoD << " bit" << endl;
+	cout << "Length of number " << d.to_str(num_sys::bin) << " is " << d.NoD << " bit" << endl;
 	d.negate();
-	cout << "Negate of number is  " << d.to_str(num_sys::dec) << endl;
+	cout << "Negate of number is  " << d.to_str(num_sys::oct) << endl;
 	d.negate();
-	cout << "Negate of number again is  " << d.to_str(num_sys::dec) << endl;
+	cout << "Negate of number again is  " << d.to_str(num_sys::hex) << endl;
 	cout << endl;
+
+	Timer mt;
 
 	cout << "Summation of numbers " << endl;
 	res1 = add(c, d);
-	cout << c.to_str(num_sys::dec) << " + " << d.to_str(num_sys::dec) << " = " << res1.to_str(num_sys::dec) << endl;
+	cout << c.to_str(num_sys::bin) << " + " << d.to_str(num_sys::oct) << " = " << res1.to_str(num_sys::hex) << endl;
 	cout << "Length of summ " << res1.to_str(num_sys::dec) << " is " << res1.NoD << " bit" << endl;
 	cout << endl;
 
 	cout << "Subtraction of numbers " << endl;
 	res1 = sub(c, d);
-	cout << c.to_str(num_sys::dec) << " - " << d.to_str(num_sys::dec)  << " = " << res1.to_str(num_sys::dec) << endl;
+	cout << c.to_str(num_sys::bin) << " - " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
 	cout << "Length of subtract " << res1.to_str(num_sys::dec) << " is " << res1.NoD << " bit" << endl;
 	cout << endl;
 
 	cout << "Multiplication of numbers " << endl;
 	res1 = mul(c, d);
-	cout << c.to_str(num_sys::dec) << " * " << d.to_str(num_sys::dec)  << " = " << res1.to_str(num_sys::dec) << endl;
+	cout << c.to_str(num_sys::bin) << " * " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
 	cout << "Length of product " << res1.to_str(num_sys::dec) << " is " << res1.NoD << " bit" << endl;
 	cout << endl;
 
 	cout << "Division of numbers " << endl;
 	res1 = div(c, d);
-	cout << c.to_str(num_sys::dec) << " / " << d.to_str(num_sys::dec)  << " = " << res1.to_str(num_sys::dec) << endl;
+	cout << c.to_str(num_sys::bin) << " / " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
 	cout << "Length of quotient " << res1.to_str(num_sys::dec) << " is " << res1.NoD << " bit" << endl;
 	cout << endl;
 
 	cout << "Division of numbers by module " << endl;
 	res1 = mod(c, d);
-	cout << c.to_str(num_sys::dec) << " % " << d.to_str(num_sys::dec)  << " = " << res1.to_str(num_sys::dec) << endl;
+	cout << c.to_str(num_sys::bin) << " % " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
 	cout << "Length of remainder " << res1.to_str(num_sys::dec) << " is " << res1.NoD << " bit" << endl;
 	cout << endl;
 
-	cin >> e;
+	cout << "runtime = " << mt.elapsed() << " s" << endl;
+
+	system("pause");
 	return 0;
 }
