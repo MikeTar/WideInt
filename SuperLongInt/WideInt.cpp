@@ -5,8 +5,6 @@
 
 using namespace std;
 
-bool zero(char[], int);
-
 enum num_sys
 {
 	bin = 2,
@@ -41,6 +39,41 @@ wnum1 rem;
 wnum1 div(wnum1, wnum1);
 wnum1 ndiv(wnum1, wnum1);
 
+bool zero(char in[], int n)
+{
+	for (int i = 0; i < n; ++i)
+	{
+		if (in[i] == '-') continue;
+		if (in[i] != '0')
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+int input(char input[])
+{
+	int exit;
+	int n;
+	do {
+		exit = 1;
+		n = -1;
+		cout << "Input a number:" << endl;
+		cin >> input;
+
+		while (input[++n] != '\0') {
+			if (input[n] == '-') continue;
+			if (input[n] < '0' || '9'  < input[n]) {
+				input[0] = '\0';
+				exit = 0;
+				cout << "Input numbers from 0 to 9 only." << endl;
+				break;
+			}
+		};
+	} while (!exit);
+	return n;
+}
 
 void wnum1::set_num(char num[], int n)
 {
@@ -127,12 +160,6 @@ void wnum1::inc()
 		res[i] = bwnum[i] ^ tmp[i] ^ carry;
 		carry = ((bwnum[i] | tmp[i]) & carry) | (bwnum[i] & tmp[i]) ? 1 : 0;
 	}
-	//if (carry)
-	//{
-	//	res.push_back(carry);
-	//	carry = 0;
-	//}
-
 	bwnum = res;
 }
 
@@ -223,31 +250,6 @@ string wnum1::to_str(num_sys divr)
 	default:
 		break;
 	}
-
-
-	//if (SF)	ns += ')';
-	//int i = 0;
-	//int prev_i = i;
-	//for (auto v : bwnum)
-	//{
-	//	ns += (char)v + '0';
-	//	if ((i - prev_i) == 3)
-	//	{
-	//		ns += ' ';
-	//		prev_i = i + 1;
-	//	}
-	//	++i;
-	//}
-	//if (SF) ns = (ns + '-') + '(';
-
-	//int NoD = (int)ns.size() - 1;
-	//for (int i = 0; i < (int)ns.size() / 2; i++)
-	//{
-	//	char buf = ns[i];
-	//	ns[i] = ns[NoD - i];
-	//	ns[NoD - i] = buf;
-	//}
-
 	return ns;
 }
 
@@ -304,7 +306,7 @@ wnum1 wnum1::Rsh(uint32_t n)
 
 bool wnum1::isNAN()
 {
-	bool res = bwnum.empty(); /*!(bwnum.size())*/;
+	bool res = bwnum.empty();
 	return res;
 }
 
@@ -453,15 +455,15 @@ wnum1 div(wnum1 dividend, wnum1 divisor)
 	return quotient;
 } 
 
+// Working version
 wnum1 ndiv(wnum1 dividend, wnum1 divisor)
 {
 	wnum1 quotient, remainder;
-	wnum1 q, r/*, rqq*/;
-	wnum1 lq, rq/*, qq*/;
+	wnum1 q, r;
+	wnum1 lq, rq;
 
 	wnum1 one;
 	one.bwnum.resize(1, 1);
-	//tmp[0] = tmp[1] = one;
 
 	int k = dividend.NoD - divisor.NoD;
 
@@ -488,20 +490,16 @@ wnum1 ndiv(wnum1 dividend, wnum1 divisor)
 		{
 			lq = one.Lsh(k + 1);
 			rq = one.Lsh(k - 1);
-			//rq = 1 << (k - 1);
 
 			wnum1 stop;
 			stop.SF = false;
 			do
 			{
 				q = (add(lq, rq)).Rsh(1);
-				//qq = (lq + rq)*2/3 /*>> (1)*/;
-				//q.set_num(qq);
 				divd = mul(divisor, q);
 				r = sub(dividend, divd);
 				if (!r.SF)
 					stop = sub(r, divisor);
-				//rqq.set_num(rq);
 				wnum1 zero = sub(q, rq);
 
 				if (r.SF && !stop.SF && !zero.ZF)
@@ -521,7 +519,6 @@ wnum1 ndiv(wnum1 dividend, wnum1 divisor)
 			quotient.set_num(1);
 			rem = remainder = sub(dividend, divisor);
 		}
-
 	}
 	else
 	{

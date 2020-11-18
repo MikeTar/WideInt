@@ -112,10 +112,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SLI.cpp" />
+    <ClCompile Include="WideNums.cpp" />
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="WideNum.cpp" />
-    <ClCompile Include="WideNum1.cpp" />
+    <ClCompile Include="WideInt.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
