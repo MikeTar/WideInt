@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cstdio>
 #include <chrono> // для функций из std::chrono
+#include "wideint.h"
 
 #ifdef DEBUG
 #define mode "Debug mode"
@@ -51,23 +52,13 @@ int input(char[]);
 //	void wnum::set_num(int);
 //};
 
-enum num_sys
-{
-	bin = 2,
-	oct = 8,
-	dec = 10,
-	hex = 16
-};
-
 struct wnum1
 {
 	int NoD;
 	vector<bool> bwnum;
 	void set_num(char[], int);
 	void set_num(wnum1&);
-	//void set_num(int);
-	template<typename T>
-	void wnum1::set_num(T num);
+	void set_num(int64_t);
 	void negate();
 	void altcode();
 	void inc();
@@ -92,13 +83,15 @@ wnum1 mod(wnum1, wnum1);
 
 int main()
 {
-	string e;
+	wint a("25");
+
+	cout << "Binary number value is " << a.to_str(num_sys::bin) << endl;
 
 	bool CF = 0;
-	wnum1 c, d, res1;
+	wint c, d, res1;
 	cout << "First number value " << endl;
 	int n = input(num_str);
-	c.set_num(num_str, n);
+	c.set_num(num_str);
 	cout << "Length of number " << c.to_str(num_sys::bin) << " is " << c.NoD << " bit" << endl;	//num_sys::dec
 	c.negate();
 	cout << "Negate of number is  " << c.to_str(num_sys::oct) << endl;
