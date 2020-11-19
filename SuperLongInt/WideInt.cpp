@@ -20,7 +20,7 @@ struct wnum1
 	vector<bool> bwnum;
 	void set_num(char[], int);
 	void set_num(wnum1&);
-	void set_num(int);
+	void set_num(int64_t);
 	void negate();
 	void altcode();
 	void inc();
@@ -116,7 +116,7 @@ void wnum1::set_num(wnum1& wn)
 	NoD = wn.NoD;
 }
 
-void wnum1:: set_num(int num)
+void wnum1:: set_num(int64_t num)
 {
 	int sz = sizeof(num) * 8;
 	vector<bool> tmp(sz);
@@ -186,7 +186,7 @@ string wnum1::to_str(num_sys divr)
 
 	case 8:
 		if (SF)	ns += ')';
-		divrin.set_num(divr);
+		divrin.set_num((int)divr);
 		while(!quot.ZF)
 		{
 			ch = 0;
