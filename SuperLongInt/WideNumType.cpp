@@ -40,7 +40,7 @@ wint::wint(int64_t& num)
 	//}
 }
 
-wint::wint(string& num_str)
+wint::wint(string num_str)
 {
 	char ch;
 	div_t res;
@@ -72,23 +72,13 @@ wint::wint(string& num_str)
 			num_str.replace(i,1, 1, ch);
 		}
 	} while (end);
-
+	resize();
 }
 
-void wint::set_num(const string num_str)
-{
-	int beg = -1;
-	if (num_str[0] == '-')
-	{
-		++beg;
-		SF = 1;
-	}
-
-	for (int i = num_str.size() - 1; i > beg; i--)
-	{
-		bwint.push_back((num_str[i] - '0') & 1);
-	}
-}
+//void wint::set_num(string num_str)
+//{
+//	wint(num_str);
+//}
 
 void wint::set_num(wint* wn)
 {
@@ -151,10 +141,11 @@ string wint::to_str(num_sys divr)
 	string ns;
 	wint divrin, quot;
 
-	quot.bwint = bwint;
-	quot.SF = SF;
-	quot.NoD = NoD;
+	//quot.bwint = bwint;
+	//quot.SF = SF;
+	//quot.NoD = NoD;
 
+	quot = *this;
 
 	switch (divr)
 	{
@@ -397,6 +388,34 @@ wint wint::operator%(wint& divr)
 	remm.ZF = rem.ZF;
 
 	return remm;
+}
+
+wint wint::operator=(string num_str)
+{
+	wint res(num_str);
+	//bwint = res.bwint;
+	//NoD = res.NoD;
+	//ZF = res.ZF;
+	//SF = res.SF;
+	*this = res;
+
+	return res;
+}
+
+wint wint::operator=(int64_t &num)
+{
+	wint res(num);
+	//bwint = res.bwint;
+	//NoD = res.NoD;
+	//ZF = res.ZF;
+	//SF = res.SF;
+	*this = res;
+	return res;
+}
+
+int wint::size()
+{
+	return NoD;
 }
 
 

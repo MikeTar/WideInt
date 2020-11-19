@@ -27,6 +27,10 @@ public:
 	wint operator* (wint&);
 	wint operator/ (wint&);
 	wint operator% (wint&);
+	wint operator= (string);
+	wint operator= (int64_t&);
+	int size();
+	void negate();
 
 private:
 	struct reminder
@@ -38,7 +42,6 @@ private:
 	}rem;
 	int NoD;
 	vector<bool> bwint;
-	void negate();
 	void altcode();
 	void inc();
 	void resize();
@@ -50,7 +53,7 @@ private:
 	bool isNAN();
 	void set_num(wint*);
 	void set_num(int64_t);
-	void set_num(string);
+	//void set_num(string);
 };
 
 #endif //WIDEINTTYPE
