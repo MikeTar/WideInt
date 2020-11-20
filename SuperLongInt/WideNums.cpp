@@ -14,12 +14,13 @@
 
 std::ostream& operator<<(std::ostream& out, wint &wn)
 {
+	auto flags = cout.flags();
 	//if(ios::binary) out << wn.to_str(num_sys::bin);
-	if (oct)
+	if (flags & std::ios::oct)
 		out << wn.to_str(num_sys::_oct);
-	else if (ios::dec)
+	else if (flags & std::ios::dec)
 		out << wn.to_str(num_sys::_dec);
-	else if (ios::hex)
+	else if (flags & std::ios::hex)
 		out << wn.to_str(num_sys::_hex);
 	else
 	out << wn.to_str(num_sys::_bin);
@@ -69,7 +70,9 @@ int main()
 	cin >> num_str;
 	c = num_str;
 	cout << "Length of number " << c.to_str(num_sys::_bin) << " is " << c.size() << " bit" << endl;	//num_sys::_dec
-	cout << "Length of number " << c << " is " << dec << c.size() << " bit" << endl;	//num_sys::_dec
+	cout << "Length of number " << oct << c << " is " << c.size() << " bit" << endl;	//num_sys::_dec
+	cout << "Length of number " << dec << c << " is " << c.to_str(num_sys::_dec).size() << " digits" << endl;	//num_sys::_dec
+	cout << "Length of number " << hex << c << " is " << c.size() << " bit" << endl;	//num_sys::_dec
 	c = c.negate();
 	cout << "Negate of number is  " << c.to_str(num_sys::_oct) << endl;
 	c = c.negate();
