@@ -59,9 +59,9 @@ string num_str;
 
 int main()
 {
-	wint a("25");
+	wint a(25);
 
-	cout << "Binary number value is " << a.to_str(num_sys::_bin) << endl;
+	cout << "Binary value of number " << a << " is " << a.to_str(num_sys::_bin) << endl;
 
 	bool CF = 0;
 	wint c, d, res1;

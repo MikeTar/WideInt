@@ -29,7 +29,7 @@ wint::wint()
 //	delete rem;
 //}
 
-wint::wint(int64_t& num)
+wint::wint(int64_t num)
 {
 	if (num != 0)
 	{	

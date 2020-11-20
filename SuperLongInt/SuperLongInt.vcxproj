@@ -114,7 +114,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="WideNums.cpp" />
-    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="WideNumType.cpp" />
   </ItemGroup>
   <ItemGroup>

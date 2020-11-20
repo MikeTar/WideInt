@@ -20,7 +20,7 @@ class wint
 public:
 	struct reminder;
 	wint();
-	wint(int64_t&);
+	wint(int64_t);
 	wint(string);
 	//~wint();
 	string to_str(num_sys);
