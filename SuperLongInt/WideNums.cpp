@@ -12,6 +12,20 @@
 #define mode "Release mode"
 #endif // DEBUG
 
+std::ostream& operator<<(std::ostream& out, wint &wn)
+{
+	//if(ios::binary) out << wn.to_str(num_sys::bin);
+	if (oct)
+		out << wn.to_str(num_sys::_oct);
+	else if (ios::dec)
+		out << wn.to_str(num_sys::_dec);
+	else if (ios::hex)
+		out << wn.to_str(num_sys::_hex);
+	else
+	out << wn.to_str(num_sys::_bin);
+	return out;
+}
+
 
 using namespace std;
 
@@ -46,7 +60,7 @@ int main()
 {
 	wint a("25");
 
-	cout << "Binary number value is " << a.to_str(num_sys::bin) << endl;
+	cout << "Binary number value is " << a.to_str(num_sys::_bin) << endl;
 
 	bool CF = 0;
 	wint c, d, res1;
@@ -54,70 +68,71 @@ int main()
 	cout << "Input a number:" << endl;
 	cin >> num_str;
 	c = num_str;
-	cout << "Length of number " << c.to_str(num_sys::bin) << " is " << c.size() << " bit" << endl;	//num_sys::dec
-	c.negate();
-	cout << "Negate of number is  " << c.to_str(num_sys::oct) << endl;
-	c.negate();
-	cout << "Negate of number again is  " << c.to_str(num_sys::hex) << endl;
+	cout << "Length of number " << c.to_str(num_sys::_bin) << " is " << c.size() << " bit" << endl;	//num_sys::_dec
+	cout << "Length of number " << c << " is " << dec << c.size() << " bit" << endl;	//num_sys::_dec
+	c = c.negate();
+	cout << "Negate of number is  " << c.to_str(num_sys::_oct) << endl;
+	c = c.negate();
+	cout << "Negate of number again is  " << c.to_str(num_sys::_hex) << endl;
 	cout << endl;
 
 	cout << "Second number value " << endl;
 	cout << "Input a number:" << endl;
 	cin >> num_str;
 	d = num_str;
-	cout << "Length of number " << d.to_str(num_sys::bin) << " is " << d.size() << " bit" << endl;
-	d.negate();
-	cout << "Negate of number is  " << d.to_str(num_sys::oct) << endl;
-	d.negate();
-	cout << "Negate of number again is  " << d.to_str(num_sys::hex) << endl;
+	cout << "Length of number " << d.to_str(num_sys::_bin) << " is " << d.size() << " bit" << endl;
+	d = d.negate();
+	cout << "Negate of number is  " << d.to_str(num_sys::_oct) << endl;
+	d = d.negate();
+	cout << "Negate of number again is  " << d.to_str(num_sys::_hex) << endl;
 	cout << endl;
 	
 	cout << "Summation of numbers " << endl;
 	Timer mt;
 	res1 = c + d;
 	cout << "Time of  Summation = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::bin) << " + " << d.to_str(num_sys::oct) << " = " << res1.to_str(num_sys::hex) << endl;
-	cout << "Length of summ " << res1.to_str(num_sys::dec) << " is " << res1.size() << " bit" << endl;
+	cout << c.to_str(num_sys::_bin) << " + " << d.to_str(num_sys::_oct) << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << "Length of summ " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
 	cout << "Subtraction of numbers " << endl;
 	mt.reset();
 	res1 = c - d;
 	cout << "Time of  Subtraction = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::bin) << " - " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
-	cout << "Length of subtract " << res1.to_str(num_sys::dec) << " is " << res1.size() << " bit" << endl;
+	cout << c.to_str(num_sys::_bin) << " - " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << "Length of subtract " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
 	cout << "Multiplication of numbers " << endl;
 	mt.reset();
 	res1 = c * d;
 	cout << "Time of  Multiplication = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::bin) << " * " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
-	cout << "Length of product " << res1.to_str(num_sys::dec) << " is " << res1.size() << " bit" << endl;
+	cout << c.to_str(num_sys::_bin) << " * " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << "Length of product " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
 	cout << "Division of numbers " << endl;
 	mt.reset();
 	res1 = c / d;
 	cout << "Time of  Division = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::bin) << " / " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
-	cout << "Length of quotient " << res1.to_str(num_sys::dec) << " is " << res1.size() << " bit" << endl;
+	cout << c.to_str(num_sys::_bin) << " / " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << "Length of quotient " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
 	cout << "Division of numbers by module " << endl;
 	mt.reset();
 	res1 = c % d;
 	cout << "Time of  Division by module = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::bin) << " % " << d.to_str(num_sys::oct)  << " = " << res1.to_str(num_sys::hex) << endl;
-	cout << "Length of remainder " << res1.to_str(num_sys::dec) << " is " << res1.size() << " bit" << endl;
+	cout << c.to_str(num_sys::_bin) << " % " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << "Length of remainder " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
 	//cout << "Division of numbers " << endl;
 	//mt.reset();
 	//res1 = ndiv(c, d);
 	//cout << "Time of  Division by ndiv() = " << mt.elapsed() << " s" << " in " << mode << endl;
-	//cout << c.to_str(num_sys::bin) << " / " << d.to_str(num_sys::oct) << " = " << res1.to_str(num_sys::hex) << endl;
-	//cout << "Length of quotient " << res1.to_str(num_sys::dec) << " is " << res1.size() << " bit" << endl;
+	//cout << c.to_str(num_sys::_bin) << " / " << d.to_str(num_sys::_oct) << " = " << res1.to_str(num_sys::_hex) << endl;
+	//cout << "Length of quotient " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	//cout << endl;
 
 

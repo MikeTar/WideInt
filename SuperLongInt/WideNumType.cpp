@@ -1,15 +1,33 @@
 #include"wideint.h"
 
-wint rem;
+//std::ostream& operator<<(std::ostream& out, wint &wn)
+//{
+//	//if(ios::binary) out << wn.to_str(num_sys::bin);
+//	if(ios::oct)
+//		out << wn.to_str(num_sys::_oct);
+//	else if(ios::dec)
+//		out << wn.to_str(num_sys::_dec);
+//	else if(ios::hex)
+//		out << wn.to_str(num_sys::_hex);
+//	else
+//		out << wn.to_str(num_sys::_bin);
+//	return out;
+//}
+
 wint div(wint, wint);
-//wint ndiv(wint, wint);
 
 wint::wint()
 {
+	//rem = (reminder*)malloc(sizeof(reminder));
 	bwint.push_back(0);
 	NoD = ZF = 1;
 	SF = 0;
 }
+
+//wint::~wint()
+//{
+//	delete rem;
+//}
 
 wint::wint(int64_t& num)
 {
@@ -103,13 +121,16 @@ void wint::set_num(int64_t num)
 	for (int i = 0; i < j - 1; i++) tmp[i] = (bool)((num >> i) & 1);
 	while (tmp[j] != 1) { --NoD; --j; }
 	tmp.resize(NoD);
+	ZF = 0;
 	bwint = tmp;
 
 }
 
-void wint::negate()
+wint wint::negate()
 {
-	SF = !SF;
+	wint res = *this;
+	res.SF = !SF;
+	return res;
 }
 
 void wint::altcode()
@@ -164,15 +185,16 @@ string wint::to_str(num_sys divr)
 		{
 			ch = 0;
 			quot = quot / divrin;
-			if (!rem.ZF)
+			if (!quot.rem->ZF)	//The ZF is flag of zero. When ZF = false it means that number not equal to zero, else it means that number is zero.
 			{
-				for (int i = rem.NoD - 1; i >= 0; i--)
-					ch = (ch | rem.bwint[i]) << 1;
+				for (int i = quot.rem->NoD - 1; i >= 0; i--)
+					ch = (ch | quot.rem->bwint[i]) << 1;
 				ch >>= 1;
 				ns = (char)(ch + '0') + ns;
 			}
 			else ns = (char)(ch + '0') + ns;
 		}
+		if (ZF) ns = '0' + ns;
 		if (SF) ns = (char)('(') + ((char)('-') + ns);
 		ns = '0' + ns;
 		break;
@@ -184,15 +206,16 @@ string wint::to_str(num_sys divr)
 		{
 			ch = 0;
 			quot = quot / divrin;
-			if (!rem.ZF)
+			if (!quot.rem->ZF)
 			{
-				for (int i = rem.NoD - 1; i >= 0; i--)
-					ch = (ch | rem.bwint[i]) << 1;
+				for (int i = quot.rem->NoD - 1; i >= 0; i--)
+					ch = (ch | quot.rem->bwint[i]) << 1;
 				ch >>= 1;
 				ns = (char)(ch + '0') + ns;
 			}
 			else ns = (char)(ch + '0') + ns;
 		}
+		if (ZF) ns = '0' + ns;
 		if (SF) ns = (char)('(') + ((char)('-') + ns);
 		break;
 
@@ -203,10 +226,10 @@ string wint::to_str(num_sys divr)
 		{
 			ch = 0;
 			quot = quot / divrin;
-			if (!rem.ZF)
+			if (!quot.rem->ZF)
 			{
-				for (int i = rem.NoD - 1; i >= 0; i--)
-					ch = (ch | rem.bwint[i]) << 1;
+				for (int i = quot.rem->NoD - 1; i >= 0; i--)
+					ch = (ch | quot.rem->bwint[i]) << 1;
 				ch >>= 1;
 				if (ch >= 10)
 					ch = (ch - 10) + 'A';
@@ -216,6 +239,7 @@ string wint::to_str(num_sys divr)
 			}
 			else ns = (char)(ch + '0') + ns;
 		}
+		if (ZF) ns = '0' + ns;
 		if (SF) ns = (char)('(') + ((char)('-') + ns);
 		ns = '0' + ('x' + ns);
 		break;
@@ -226,7 +250,7 @@ string wint::to_str(num_sys divr)
 	return ns;
 }
 
-wint wint::operator+(wint& term2)
+wint wint::operator+(wint term2)
 {
 	int sz;
 	wint res;
@@ -276,18 +300,17 @@ wint wint::operator+(wint& term2)
 	return res;
 }
 
-wint wint::operator-(wint& subtrahend)
+wint wint::operator-(wint subtrahend)
 {
 	wint /*minuend,*/ res;
 	/*minuend.set_num(this);*/
-	subtrahend.negate();
 	//res = minuend + subtrahend;
-	res = *this + subtrahend;
+	res = *this + subtrahend.negate();
 	res.resize();
 	return res;
 }
 
-wint wint::operator*(wint& wnumin2)
+wint wint::operator*(wint wnumin2)
 {
 	wint product, tmp[2];
 	bool SF = 0;
@@ -321,7 +344,7 @@ wint wint::operator*(wint& wnumin2)
 	return product;
 }
 
-wint wint::operator/(wint& divisor)
+wint wint::operator/(wint divisor)
 {
 	wint quotient, remainder;
 
@@ -365,10 +388,11 @@ wint wint::operator/(wint& divisor)
 	if (!remainder.isNAN() && remainder.NoD < 0)
 		remainder.NoD = (int)remainder.bwint.size();
 	remainder.resize();
-	rem.bwint = remainder.bwint;
-	rem.NoD = remainder.NoD;
-	rem.SF = remainder.SF;
-	rem.ZF = remainder.ZF;
+	r.bwint = remainder.bwint;
+	r.NoD = remainder.NoD;
+	r.SF = remainder.SF;
+	r.ZF = remainder.ZF;
+	rem = &r;
 
 	if (!quotient.isNAN() && quotient.NoD < 0)
 		quotient.NoD = (int)quotient.bwint.size();
@@ -378,39 +402,50 @@ wint wint::operator/(wint& divisor)
 	return quotient;
 }
 
-wint wint::operator%(wint& divr)
+wint wint::operator%(wint divr)
 {
-	*this / divr;
-	wint remm;
-	remm.bwint = rem.bwint;
-	remm.NoD = rem.NoD;
-	remm.SF = rem.SF;
-	remm.ZF = rem.ZF;
+	
+	wint rem = *this / divr;
+	rem.bwint = this->rem->bwint;
+	rem.NoD = this->rem->NoD;
+	rem.SF = this->rem->SF;
+	rem.ZF = this->rem->ZF;
 
-	return remm;
+	return rem;
 }
 
-wint wint::operator=(string num_str)
+wint& wint::operator=(wint &wn)
+{
+	//*this = wn;
+	NoD = wn.NoD;
+	bwint = wn.bwint;
+	SF = wn.SF;
+	ZF = wn.ZF;
+
+	if (wn.rem)
+	{
+		r.NoD = wn.rem->NoD;
+		r.bwint = wn.rem->bwint;
+		r.SF = wn.rem->SF;
+		r.ZF = wn.rem->ZF;
+		rem = &r;
+	}
+	return *this;
+}
+
+wint& wint::operator=(string num_str)
 {
 	wint res(num_str);
-	//bwint = res.bwint;
-	//NoD = res.NoD;
-	//ZF = res.ZF;
-	//SF = res.SF;
 	*this = res;
 
-	return res;
+	return *this;
 }
 
-wint wint::operator=(int64_t &num)
+wint& wint::operator=(int64_t &num)
 {
 	wint res(num);
-	//bwint = res.bwint;
-	//NoD = res.NoD;
-	//ZF = res.ZF;
-	//SF = res.SF;
 	*this = res;
-	return res;
+	return *this;
 }
 
 int wint::size()
@@ -434,6 +469,7 @@ void wint::_Lsh(uint32_t n)
 	vector<bool> tmp;
 	tmp.resize(bwint.size() + (size_t)n);
 	for (int i = n; i < (int)tmp.size(); i++) tmp[i] = bwint[i - n];
+	NoD = tmp.size();
 	bwint = tmp;
 }
 
@@ -445,7 +481,7 @@ wint wint::Lsh(uint32_t n)
 	tmp.bwint.clear();
 	tmp.bwint.resize(bwint.size() + (size_t)n);
 	for (int i = n; i < (int)tmp.bwint.size(); i++) tmp.bwint[i] = bwint[i - n];
-	//bwint = tmp;
+	tmp.NoD = tmp.size();
 	return tmp;
 }
 
@@ -455,6 +491,7 @@ void wint::_Rsh(uint32_t n)
 	vector<bool> tmp;
 	tmp.resize(bwint.size() - (size_t)n);
 	for (int i = 0; i < (int)tmp.size(); i++) tmp[i] = bwint[i + n];
+	NoD = tmp.size();
 	bwint = tmp;
 }
 
@@ -466,12 +503,11 @@ wint wint::Rsh(uint32_t n)
 	tmp.bwint.clear();
 	tmp.bwint.resize(bwint.size() - (size_t)n);
 	for (int i = 0; i < (int)tmp.bwint.size(); i++) tmp.bwint[i] = bwint[i + n];
-	//bwint = tmp;
+	tmp.NoD = tmp.size();
 	return tmp;
 }
 
 bool wint::isNAN()
 {
-	bool res = bwint.empty();
-	return res;
+	return bwint.empty();
 }
