@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
 #include <ctime>
@@ -23,7 +24,7 @@ std::ostream& operator<<(std::ostream& out, wint &wn)
 	else if (flags & std::ios::hex)
 		out << wn.to_str(num_sys::_hex);
 	else
-	out << wn.to_str(num_sys::_bin);
+		out << wn.to_str(num_sys::_bin);
 	return out;
 }
 
@@ -59,20 +60,22 @@ string num_str;
 
 int main()
 {
-	wint a(25);
+	wint e(25);
 
-	cout << "Binary value of number " << a << " is " << a.to_str(num_sys::_bin) << endl;
+	cout << "Binary value of number " << e << " is " << e.to_str(num_sys::_bin) << endl;
 
 	bool CF = 0;
 	wint c, d, res1;
 	cout << "First number value " << endl;
 	cout << "Input a number:" << endl;
 	cin >> num_str;
+	int a = stoi(num_str);
 	c = num_str;
 	cout << "Length of number " << c.to_str(num_sys::_bin) << " is " << c.size() << " bit" << endl;	//num_sys::_dec
 	cout << "Length of number " << oct << c << " is " << c.size() << " bit" << endl;	//num_sys::_dec
 	cout << "Length of number " << dec << c << " is " << c.to_str(num_sys::_dec).size() << " digits" << endl;	//num_sys::_dec
 	cout << "Length of number " << hex << c << " is " << c.size() << " bit" << endl;	//num_sys::_dec
+	cout << dec;
 	c = c.negate();
 	cout << "Negate of number is  " << c.to_str(num_sys::_oct) << endl;
 	c = c.negate();
@@ -82,6 +85,7 @@ int main()
 	cout << "Second number value " << endl;
 	cout << "Input a number:" << endl;
 	cin >> num_str;
+	int b = stoi(num_str);
 	d = num_str;
 	cout << "Length of number " << d.to_str(num_sys::_bin) << " is " << d.size() << " bit" << endl;
 	d = d.negate();
@@ -89,7 +93,7 @@ int main()
 	d = d.negate();
 	cout << "Negate of number again is  " << d.to_str(num_sys::_hex) << endl;
 	cout << endl;
-	
+
 	cout << "Summation of numbers " << endl;
 	Timer mt;
 	res1 = c + d;
@@ -102,7 +106,7 @@ int main()
 	mt.reset();
 	res1 = c - d;
 	cout << "Time of  Subtraction = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::_bin) << " - " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << c.to_str(num_sys::_bin) << " - " << d.to_str(num_sys::_oct) << " = " << res1.to_str(num_sys::_hex) << endl;
 	cout << "Length of subtract " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
@@ -110,7 +114,7 @@ int main()
 	mt.reset();
 	res1 = c * d;
 	cout << "Time of  Multiplication = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::_bin) << " * " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << c.to_str(num_sys::_bin) << " * " << d.to_str(num_sys::_oct) << " = " << res1.to_str(num_sys::_hex) << endl;
 	cout << "Length of product " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
@@ -118,7 +122,7 @@ int main()
 	mt.reset();
 	res1 = c / d;
 	cout << "Time of  Division = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::_bin) << " / " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << c.to_str(num_sys::_bin) << " / " << d.to_str(num_sys::_oct) << " = " << res1.to_str(num_sys::_hex) << endl;
 	cout << "Length of quotient " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
@@ -126,10 +130,16 @@ int main()
 	mt.reset();
 	res1 = c % d;
 	cout << "Time of  Division by module = " << mt.elapsed() << " s" << " in " << mode << endl;
-	cout << c.to_str(num_sys::_bin) << " % " << d.to_str(num_sys::_oct)  << " = " << res1.to_str(num_sys::_hex) << endl;
+	cout << c.to_str(num_sys::_bin) << " % " << d.to_str(num_sys::_oct) << " = " << res1.to_str(num_sys::_hex) << endl;
 	cout << "Length of remainder " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	cout << endl;
 
+	cout << "Real division of wide integer numbers " << endl;
+	mt.reset();
+	double dres = ddiv(c, d);
+	cout << "Time of  Division by module = " << mt.elapsed() << " s" << " in " << mode << endl;
+	cout << c << " // " << d << " = " << setw(16) << scientific << setprecision(15) << dres << endl;
+	cout << endl;
 	//cout << "Division of numbers " << endl;
 	//mt.reset();
 	//res1 = ndiv(c, d);
@@ -138,6 +148,11 @@ int main()
 	//cout << "Length of quotient " << res1.to_str(num_sys::_dec) << " is " << res1.size() << " bit" << endl;
 	//cout << endl;
 
+	mt.reset();
+	dres = ddiv(a, b);
+	cout << "Time of  Division by module = " << mt.elapsed() << " s" << " in " << mode << endl;
+	cout << a << " // " << b << " = " << setw(16) << scientific << setprecision(15) << dres << endl;
+	cout << endl;
 
 	system("pause");
 	return 0;

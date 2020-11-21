@@ -36,6 +36,7 @@ public:
 	wint negate();
 	reminder *rem;
 	friend std::ostream& operator<<(std::ostream& out, const wint &wn);
+	friend double ddiv(wint d1, wint d2);
 
 private:
 	struct reminder

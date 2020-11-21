@@ -32,7 +32,7 @@ wint::wint()
 wint::wint(int64_t num)
 {
 	if (num != 0)
-	{	
+	{
 		int sz = sizeof(num) * 8;
 		vector<bool> tmp(sz);
 		NoD = sz;
@@ -72,7 +72,7 @@ wint::wint(string num_str)
 
 	do
 	{
-		bwint.push_back((num_str[end-1] - '0') & 1);
+		bwint.push_back((num_str[end - 1] - '0') & 1);
 
 		res.rem = 0;
 
@@ -85,9 +85,9 @@ wint::wint(string num_str)
 		for (int i = beg; i < end; ++i)
 		{
 			int a = (num_str[i] - '0') + res.rem * 10;
-			res = div(a,2);
+			res = div(a, 2);
 			ch = res.quot + '0';
-			num_str.replace(i,1, 1, ch);
+			num_str.replace(i, 1, 1, ch);
 		}
 	} while (end);
 	resize();
@@ -250,6 +250,33 @@ string wint::to_str(num_sys divr)
 	return ns;
 }
 
+double wint::double_div(wint divr)
+{
+	double dres, pdres;
+	wint divd, res, srav;
+	divd = *this;
+	int k = divr.NoD - NoD;
+
+	if (k > 0)
+	{
+		divd.Lsh(k);
+		srav = divd - divr;
+		if (srav.SF)
+		{
+			divd.Lsh(1);
+		}
+		res = divd / divr;
+		dres = 0, pdres;
+		for (int i = 0; i < k; i++)
+		{
+			pdres = dres;
+			dres = (dres + (double)res.bwint[i]) / 2;
+			if (dres == pdres) break;
+		}
+	}
+	return dres;
+}
+
 wint wint::operator+(wint term2)
 {
 	int sz;
@@ -404,7 +431,7 @@ wint wint::operator/(wint divisor)
 
 wint wint::operator%(wint divr)
 {
-	
+
 	wint rem = *this / divr;
 	rem.bwint = this->rem->bwint;
 	rem.NoD = this->rem->NoD;
@@ -481,6 +508,7 @@ wint wint::Lsh(uint32_t n)
 	tmp.bwint.clear();
 	tmp.bwint.resize(bwint.size() + (size_t)n);
 	for (int i = n; i < (int)tmp.bwint.size(); i++) tmp.bwint[i] = bwint[i - n];
+	tmp.resize();
 	tmp.NoD = tmp.size();
 	return tmp;
 }
@@ -510,4 +538,38 @@ wint wint::Rsh(uint32_t n)
 bool wint::isNAN()
 {
 	return bwint.empty();
+}
+
+/*
+Result of division two wide integer numbers will be correct if first number is lower then second number.
+Otherwise result of division will contain only fractional part of result number.
+*/
+double ddiv(wint d1, wint d2)
+{
+	wint divd, res;
+	int bsize = 128;
+
+	divd = d1.Lsh(bsize);
+	res = divd / d2;
+	double dres = 0;
+	for (int i = 0; i < bsize; i++)
+		dres = (dres + (double)res.bwint[i]) / 2;
+	return dres;
+}
+
+//for verification
+double ddiv(uint64_t d1, uint64_t d2)
+{
+	uint64_t divd, res;
+	uint64_t bsize = 32;
+
+	divd = d1 << bsize;
+	res = divd / d2;
+	double dres = 0;
+	for (int i = 0; i < bsize; i++)
+	{
+		int bit = (res >> i) & 1;
+		dres = (dres + bit) / 2;
+	}
+	return dres;
 }
