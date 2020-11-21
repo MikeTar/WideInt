@@ -1,4 +1,4 @@
-#include"wideint.h"
+ï»¿#include"wideint.h"
 
 //std::ostream& operator<<(std::ostream& out, wint &wn)
 //{
@@ -58,7 +58,7 @@ wint::wint(int64_t num)
 	//}
 }
 
-// Êîíñòðóêòîð òèïà ÷åðåç òåêñòîâîå ïðåäñòàâëåíèå øèðîêîãî ÷èñëà
+// ÐšÐ¾Ð½ÑÑ‚Ñ€ÑƒÐºÑ‚Ð¾Ñ€ Ñ‚Ð¸Ð¿Ð° Ñ‡ÐµÑ€ÐµÐ· Ñ‚ÐµÐºÑÑ‚Ð¾Ð²Ð¾Ðµ Ð¿Ñ€ÐµÐ´ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ ÑˆÐ¸Ñ€Ð¾ÐºÐ¾Ð³Ð¾ Ñ‡Ð¸ÑÐ»Ð°
 wint::wint(string num_str)
 {
 	char ch;
