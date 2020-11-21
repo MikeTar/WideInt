@@ -4,7 +4,7 @@
 #include <string>
 #include <ctime>
 #include <cstdio>
-#include <chrono> // для функций из std::chrono
+#include <chrono> //  для функций из std::chrono
 #include "wideint.h"
 
 #ifdef DEBUG

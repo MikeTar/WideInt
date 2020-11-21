@@ -58,6 +58,7 @@ wint::wint(int64_t num)
 	//}
 }
 
+// Конструктор типа через текстовое представление широкого числа
 wint::wint(string num_str)
 {
 	char ch;
