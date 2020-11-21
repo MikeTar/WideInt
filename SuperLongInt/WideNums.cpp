@@ -1,10 +1,10 @@
-#include <iostream>
+п»ї#include <iostream>
 #include <iomanip>
 #include <vector>
 #include <string>
 #include <ctime>
 #include <cstdio>
-#include <chrono> //  для функций из std::chrono
+#include <chrono> //  РґР»СЏ С„СѓРЅРєС†РёР№ РёР· std::chrono
 #include "wideint.h"
 
 #ifdef DEBUG
@@ -34,7 +34,7 @@ using namespace std;
 class Timer
 {
 private:
-	// Псевдонимы типов используются для удобного доступа к вложенным типам
+	//  РџСЃРµРІРґРѕРЅРёРјС‹ С‚РёРїРѕРІ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РґР»СЏ СѓРґРѕР±РЅРѕРіРѕ РґРѕСЃС‚СѓРїР° Рє РІР»РѕР¶РµРЅРЅС‹Рј С‚РёРїР°Рј
 	using clock_t = std::chrono::high_resolution_clock;
 	using second_t = std::chrono::duration<double, std::ratio<1> >;
 
