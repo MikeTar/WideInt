@@ -1,18 +1,19 @@
 ﻿#include"wideint.h"
 
-//std::ostream& operator<<(std::ostream& out, wint &wn)
-//{
-//	//if(ios::binary) out << wn.to_str(num_sys::bin);
-//	if(ios::oct)
-//		out << wn.to_str(num_sys::_oct);
-//	else if(ios::dec)
-//		out << wn.to_str(num_sys::_dec);
-//	else if(ios::hex)
-//		out << wn.to_str(num_sys::_hex);
-//	else
-//		out << wn.to_str(num_sys::_bin);
-//	return out;
-//}
+std::ostream& operator<<(std::ostream& out, wint &wn)
+{
+	auto flags = cout.flags();
+	//if(ios::binary) out << wn.to_str(num_sys::bin);
+	if (flags & std::ios::oct)
+		out << wn.to_str(num_sys::_oct);
+	else if (flags & std::ios::dec)
+		out << wn.to_str(num_sys::_dec);
+	else if (flags & std::ios::hex)
+		out << wn.to_str(num_sys::_hex);
+	else
+		out << wn.to_str(num_sys::_bin);
+	return out;
+}
 
 wint div(wint, wint);
 
@@ -59,8 +60,12 @@ wint::wint(int64_t num)
 }
 
 // Конструктор типа через текстовое представление широкого числа
+// The constructor of the type using the text representation of a wide number.
 wint::wint(string num_str)
 {
+// Строка должна содержать только цифровые символы '0'...'9' с ведущим знаком '-' для отрицательных чисел.
+// The string must contain only the numeric characters '0'...'9' with the leading sign ' - ' for negative numbers.
+
 	char ch;
 	div_t res;
 	int beg = 0;
@@ -186,10 +191,10 @@ string wint::to_str(num_sys divr)
 		{
 			ch = 0;
 			quot = quot / divrin;
-			if (!quot.rem->ZF)	//The ZF is flag of zero. When ZF = false it means that number not equal to zero, else it means that number is zero.
+			if (!quot.r.ZF)	//The ZF is flag of zero. When ZF = false it means that number not equal to zero, else it means that number is zero.
 			{
-				for (int i = quot.rem->NoD - 1; i >= 0; i--)
-					ch = (ch | quot.rem->bwint[i]) << 1;
+				for (int i = quot.r.NoD - 1; i >= 0; i--)
+					ch = (ch | quot.r.bwint[i]) << 1;
 				ch >>= 1;
 				ns = (char)(ch + '0') + ns;
 			}
@@ -205,12 +210,12 @@ string wint::to_str(num_sys divr)
 		divrin.set_num(divr);
 		while (!quot.ZF)
 		{
-			ch = 0;
+			ch = 0; 
 			quot = quot / divrin;
-			if (!quot.rem->ZF)
+			if (!quot.r.ZF)
 			{
-				for (int i = quot.rem->NoD - 1; i >= 0; i--)
-					ch = (ch | quot.rem->bwint[i]) << 1;
+				for (int i = quot.r.NoD - 1; i >= 0; i--)
+					ch = (ch | quot.r.bwint[i]) << 1;
 				ch >>= 1;
 				ns = (char)(ch + '0') + ns;
 			}
@@ -227,10 +232,10 @@ string wint::to_str(num_sys divr)
 		{
 			ch = 0;
 			quot = quot / divrin;
-			if (!quot.rem->ZF)
+			if (!quot.r.ZF)
 			{
-				for (int i = quot.rem->NoD - 1; i >= 0; i--)
-					ch = (ch | quot.rem->bwint[i]) << 1;
+				for (int i = quot.r.NoD - 1; i >= 0; i--)
+					ch = (ch | quot.r.bwint[i]) << 1;
 				ch >>= 1;
 				if (ch >= 10)
 					ch = (ch - 10) + 'A';
@@ -249,33 +254,6 @@ string wint::to_str(num_sys divr)
 		break;
 	}
 	return ns;
-}
-
-double wint::double_div(wint divr)
-{
-	double dres, pdres;
-	wint divd, res, srav;
-	divd = *this;
-	int k = divr.NoD - NoD;
-
-	if (k > 0)
-	{
-		divd.Lsh(k);
-		srav = divd - divr;
-		if (srav.SF)
-		{
-			divd.Lsh(1);
-		}
-		res = divd / divr;
-		dres = 0, pdres;
-		for (int i = 0; i < k; i++)
-		{
-			pdres = dres;
-			dres = (dres + (double)res.bwint[i]) / 2;
-			if (dres == pdres) break;
-		}
-	}
-	return dres;
 }
 
 wint wint::operator+(wint term2)
@@ -333,8 +311,15 @@ wint wint::operator-(wint subtrahend)
 	wint /*minuend,*/ res;
 	/*minuend.set_num(this);*/
 	//res = minuend + subtrahend;
-	res = *this + subtrahend.negate();
+	res = *this + (-subtrahend)/*.negate()*/;
 	res.resize();
+	return res;
+}
+
+wint wint::operator-()
+{
+	wint res = *this;
+	res.SF = !SF;
 	return res;
 }
 
@@ -365,7 +350,7 @@ wint wint::operator*(wint wnumin2)
 		{
 			product = product + tmp[1];
 		}
-		tmp[1]._Lsh(1);
+		tmp[1].Lsh(1);
 	}
 
 	product.SF = SF;
@@ -387,12 +372,12 @@ wint wint::operator/(wint divisor)
 	if (k >= 0)
 	{
 		quotient.bwint.resize(k + 1);
-		divisor._Lsh(k);
+		divisor.Lsh(k);
 		remainder = *this - divisor;
 		quotient.bwint[k] = !remainder.SF;
 		for (int i = 1; i < k + 1; i++)
 		{
-			remainder._Lsh(1);
+			remainder.Lsh(1);
 			if (!remainder.SF)
 				remainder = remainder - divisor;
 			else
@@ -405,7 +390,7 @@ wint wint::operator/(wint divisor)
 			remainder = remainder + divisor;
 		}
 		if (((int)remainder.bwint.size() - k) > 0)
-			remainder._Rsh(k);
+			remainder.Rsh(k);
 	}
 	else
 	{
@@ -416,11 +401,11 @@ wint wint::operator/(wint divisor)
 	if (!remainder.isNAN() && remainder.NoD < 0)
 		remainder.NoD = (int)remainder.bwint.size();
 	remainder.resize();
-	r.bwint = remainder.bwint;
-	r.NoD = remainder.NoD;
-	r.SF = remainder.SF;
-	r.ZF = remainder.ZF;
-	rem = &r;
+	quotient.r.bwint = remainder.bwint;
+	quotient.r.NoD = remainder.NoD;
+	quotient.r.SF = remainder.SF;
+	quotient.r.ZF = remainder.ZF;
+	//quotient.rem = &quotient.r;
 
 	if (!quotient.isNAN() && quotient.NoD < 0)
 		quotient.NoD = (int)quotient.bwint.size();
@@ -434,10 +419,10 @@ wint wint::operator%(wint divr)
 {
 
 	wint rem = *this / divr;
-	rem.bwint = this->rem->bwint;
-	rem.NoD = this->rem->NoD;
-	rem.SF = this->rem->SF;
-	rem.ZF = this->rem->ZF;
+	rem.bwint = rem.r.bwint;
+	rem.NoD = rem.r.NoD;
+	rem.SF = rem.r.SF;
+	rem.ZF = rem.r.ZF;
 
 	return rem;
 }
@@ -449,15 +434,14 @@ wint& wint::operator=(wint &wn)
 	bwint = wn.bwint;
 	SF = wn.SF;
 	ZF = wn.ZF;
-
-	if (wn.rem)
-	{
-		r.NoD = wn.rem->NoD;
-		r.bwint = wn.rem->bwint;
-		r.SF = wn.rem->SF;
-		r.ZF = wn.rem->ZF;
-		rem = &r;
-	}
+	//if (wn.rem)
+	//{
+		r.NoD = wn.r.NoD;
+		r.bwint = wn.r.bwint;
+		r.SF = wn.r.SF;
+		r.ZF = wn.r.ZF;
+		//rem = &r;
+	//}
 	return *this;
 }
 
@@ -476,13 +460,24 @@ wint& wint::operator=(int64_t &num)
 	return *this;
 }
 
+inline wint wint::rem()
+{
+	wint res;
+	NoD = r.NoD;
+	bwint = r.bwint;
+	SF = r.SF;
+	ZF = r.ZF;
+
+	return res;
+}
+
 int wint::size()
 {
 	return NoD;
 }
 
 
-void wint::resize()
+inline void wint::resize()
 {
 	NoD = (int)bwint.size();
 	int i = NoD - 1;
@@ -491,49 +486,50 @@ void wint::resize()
 	bwint.resize(NoD);
 }
 
-void wint::_Lsh(uint32_t n)
-{
-	if (!n) return;
-	vector<bool> tmp;
-	tmp.resize(bwint.size() + (size_t)n);
-	for (int i = n; i < (int)tmp.size(); i++) tmp[i] = bwint[i - n];
-	NoD = tmp.size();
-	bwint = tmp;
-}
+//void wint::_Lsh(uint32_t n)
+//{
+//	if (!n) return;
+//	vector<bool> tmp;
+//	tmp.resize(bwint.size() + (size_t)n);
+//	for (int i = n; i < (int)tmp.size(); i++) tmp[i] = bwint[i - n];
+//	NoD = tmp.size();
+//	bwint = tmp;
+//}
 
-wint wint::Lsh(uint32_t n)
+inline wint& wint::Lsh(uint32_t n)
 {
 	wint tmp;
+	if (!n) return *this;
 	tmp.bwint = bwint;
-	if (!n) return tmp;
-	tmp.bwint.clear();
-	tmp.bwint.resize(bwint.size() + (size_t)n);
-	for (int i = n; i < (int)tmp.bwint.size(); i++) tmp.bwint[i] = bwint[i - n];
-	tmp.resize();
-	tmp.NoD = tmp.size();
-	return tmp;
+	bwint.clear();
+	bwint.resize(tmp.bwint.size() + (size_t)n);
+	for (int i = n; i < (int)bwint.size(); i++)
+		bwint[i] = tmp.bwint[i - n];
+	this->resize();
+	return *this;
 }
 
-void wint::_Rsh(uint32_t n)
-{
-	if (!n) return;
-	vector<bool> tmp;
-	tmp.resize(bwint.size() - (size_t)n);
-	for (int i = 0; i < (int)tmp.size(); i++) tmp[i] = bwint[i + n];
-	NoD = tmp.size();
-	bwint = tmp;
-}
+//void wint::_Rsh(uint32_t n)
+//{
+//	if (!n) return;
+//	vector<bool> tmp;
+//	tmp.resize(bwint.size() - (size_t)n);
+//	for (int i = 0; i < (int)tmp.size(); i++) tmp[i] = bwint[i + n];
+//	NoD = tmp.size();
+//	bwint = tmp;
+//}
 
-wint wint::Rsh(uint32_t n)
+inline wint& wint::Rsh(uint32_t n)
 {
 	wint tmp;
+	if (!n) return *this;
 	tmp.bwint = bwint;
-	if (!n) return tmp;
-	tmp.bwint.clear();
-	tmp.bwint.resize(bwint.size() - (size_t)n);
-	for (int i = 0; i < (int)tmp.bwint.size(); i++) tmp.bwint[i] = bwint[i + n];
-	tmp.NoD = tmp.size();
-	return tmp;
+	bwint.clear();
+	bwint.resize(tmp.bwint.size() - (size_t)n);
+	for (int i = 0; i < (int)bwint.size(); i++)
+		bwint[i] = tmp.bwint[i + n];
+	this->resize();
+	return *this;
 }
 
 bool wint::isNAN()
@@ -548,14 +544,21 @@ Otherwise result of division will contain only fractional part of result number.
 double ddiv(wint d1, wint d2)
 {
 	wint divd, res;
-	int bsize = 128;
+	int bsize = (d2.size() >= 32)? 2*d2.size() : 64;
 
 	divd = d1.Lsh(bsize);
 	res = divd / d2;
-	double dres = 0;
+	res.r.NoD = divd.r.NoD;
+	res.r.bwint = divd.r.bwint;
+	res.r.SF = divd.r.SF;
+	res.r.ZF = divd.r.ZF;
+	res.bwint.resize(bsize);
+
+	double out = 0;
 	for (int i = 0; i < bsize; i++)
-		dres = (dres + (double)res.bwint[i]) / 2;
-	return dres;
+		out = (out + (double)res.bwint[i]) / 2;
+
+	return out;
 }
 
 //for verification
