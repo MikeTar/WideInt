@@ -15,6 +15,15 @@ std::ostream& operator<<(std::ostream& out, wint &wn)
 	return out;
 }
 
+std::istream & operator>>(std::istream & in, wint & wn)
+{
+	string num_str;
+	in >> num_str;
+	wn = num_str;
+
+	return in;
+}
+
 wint div(wint, wint);
 
 wint::wint()
@@ -24,11 +33,6 @@ wint::wint()
 	NoD = ZF = 1;
 	SF = 0;
 }
-
-//wint::~wint()
-//{
-//	delete rem;
-//}
 
 wint::wint(int64_t num)
 {
@@ -132,13 +136,6 @@ void wint::set_num(int64_t num)
 
 }
 
-wint wint::negate()
-{
-	wint res = *this;
-	res.SF = !SF;
-	return res;
-}
-
 void wint::altcode()
 {
 	bwint.flip();
@@ -167,10 +164,6 @@ string wint::to_str(num_sys divr)
 	char ch;
 	string ns;
 	wint divrin, quot;
-
-	//quot.bwint = bwint;
-	//quot.SF = SF;
-	//quot.NoD = NoD;
 
 	quot = *this;
 
@@ -306,14 +299,24 @@ wint wint::operator+(wint term2)
 	return res;
 }
 
+wint& wint::operator+=(wint wn)
+{
+	*this = *this + wn;
+	return *this;
+}
+
 wint wint::operator-(wint subtrahend)
 {
-	wint /*minuend,*/ res;
-	/*minuend.set_num(this);*/
-	//res = minuend + subtrahend;
-	res = *this + (-subtrahend)/*.negate()*/;
+	wint res;
+	res = -subtrahend + *this;
 	res.resize();
 	return res;
+}
+
+wint & wint::operator-=(wint wn)
+{
+	*this = *this - wn;
+	return *this;
 }
 
 wint wint::operator-()
@@ -355,6 +358,12 @@ wint wint::operator*(wint wnumin2)
 
 	product.SF = SF;
 	return product;
+}
+
+wint & wint::operator*=(wint wn)
+{
+	*this = *this * wn;
+	return *this;
 }
 
 wint wint::operator/(wint divisor)
@@ -415,6 +424,12 @@ wint wint::operator/(wint divisor)
 	return quotient;
 }
 
+wint & wint::operator/=(wint wn)
+{
+	*this = *this / wn;
+	return *this;
+}
+
 wint wint::operator%(wint divr)
 {
 
@@ -427,21 +442,25 @@ wint wint::operator%(wint divr)
 	return rem;
 }
 
+wint & wint::operator%=(wint wn)
+{
+	*this = *this % wn;
+	return *this;
+}
+
 wint& wint::operator=(wint &wn)
 {
-	//*this = wn;
 	NoD = wn.NoD;
 	bwint = wn.bwint;
 	SF = wn.SF;
 	ZF = wn.ZF;
-	//if (wn.rem)
-	//{
+	if (wn.r.NoD)
+	{
 		r.NoD = wn.r.NoD;
 		r.bwint = wn.r.bwint;
 		r.SF = wn.r.SF;
 		r.ZF = wn.r.ZF;
-		//rem = &r;
-	//}
+	}
 	return *this;
 }
 
@@ -460,13 +479,41 @@ wint& wint::operator=(int64_t &num)
 	return *this;
 }
 
-inline wint wint::rem()
+wint & wint::operator++()
+{
+	*this = *this + 1;
+	return *this;
+}
+
+wint & wint::operator--()
+{
+	*this = *this - 1;
+	return *this;
+}
+
+wint wint::operator++(int)
+{
+	wint tmp = *this;
+	++(*this);
+
+	return tmp;
+}
+
+wint wint::operator--(int)
+{
+	wint tmp = *this;
+	--(*this);
+
+	return tmp;
+}
+
+wint wint::rem()
 {
 	wint res;
-	NoD = r.NoD;
-	bwint = r.bwint;
-	SF = r.SF;
-	ZF = r.ZF;
+	res.NoD = r.NoD;
+	res.bwint = r.bwint;
+	res.SF = r.SF;
+	res.ZF = r.ZF;
 
 	return res;
 }
@@ -486,16 +533,6 @@ inline void wint::resize()
 	bwint.resize(NoD);
 }
 
-//void wint::_Lsh(uint32_t n)
-//{
-//	if (!n) return;
-//	vector<bool> tmp;
-//	tmp.resize(bwint.size() + (size_t)n);
-//	for (int i = n; i < (int)tmp.size(); i++) tmp[i] = bwint[i - n];
-//	NoD = tmp.size();
-//	bwint = tmp;
-//}
-
 inline wint& wint::Lsh(uint32_t n)
 {
 	wint tmp;
@@ -508,16 +545,6 @@ inline wint& wint::Lsh(uint32_t n)
 	this->resize();
 	return *this;
 }
-
-//void wint::_Rsh(uint32_t n)
-//{
-//	if (!n) return;
-//	vector<bool> tmp;
-//	tmp.resize(bwint.size() - (size_t)n);
-//	for (int i = 0; i < (int)tmp.size(); i++) tmp[i] = bwint[i + n];
-//	NoD = tmp.size();
-//	bwint = tmp;
-//}
 
 inline wint& wint::Rsh(uint32_t n)
 {
@@ -541,10 +568,10 @@ bool wint::isNAN()
 Result of division two wide integer numbers will be correct if first number is lower then second number.
 Otherwise result of division will contain only fractional part of result number.
 */
-double ddiv(wint d1, wint d2)
+out_t ddiv(wint d1, wint d2)
 {
 	wint divd, res;
-	int bsize = (d2.size() >= 32)? 2*d2.size() : 64;
+	int bsize = (d2.size() >= sizeof(out_t)*8)? 2*d2.size() : 2*sizeof(out_t)*8;
 
 	divd = d1.Lsh(bsize);
 	res = divd / d2;
@@ -554,26 +581,9 @@ double ddiv(wint d1, wint d2)
 	res.r.ZF = divd.r.ZF;
 	res.bwint.resize(bsize);
 
-	double out = 0;
+	out_t out = 0;
 	for (int i = 0; i < bsize; i++)
-		out = (out + (double)res.bwint[i]) / 2;
+		out = (out + (out_t)res.bwint[i]) / 2;
 
 	return out;
-}
-
-//for verification
-double ddiv(uint64_t d1, uint64_t d2)
-{
-	uint64_t divd, res;
-	uint64_t bsize = 32;
-
-	divd = d1 << bsize;
-	res = divd / d2;
-	double dres = 0;
-	for (int i = 0; i < bsize; i++)
-	{
-		int bit = (res >> i) & 1;
-		dres = (dres + bit) / 2;
-	}
-	return dres;
 }
