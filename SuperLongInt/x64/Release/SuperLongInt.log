@@ -1,0 +1,15 @@
+﻿  WideNums.cpp
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(54): warning C4240: нестандартное расширение: уровень доступа "wint::reminder" теперь задан как "private", но ранее он был определен как "public"
+  c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(23): note:  см. объявление "wint::reminder"
+  WideNumType.cpp
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(54): warning C4240: нестандартное расширение: уровень доступа "wint::reminder" теперь задан как "private", но ранее он был определен как "public"
+  c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(23): note:  см. объявление "wint::reminder"
+WideNumType.cpp(81): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+WideNumType.cpp(92): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+WideNumType.cpp(190): warning C4805: |: небезопасное смешение типа "char" и типа "bool" в операции
+WideNumType.cpp(211): warning C4805: |: небезопасное смешение типа "char" и типа "bool" в операции
+WideNumType.cpp(231): warning C4805: |: небезопасное смешение типа "char" и типа "bool" в операции
+  Создание кода
+  All 386 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  SuperLongInt.vcxproj -> C:\Users\miket\Desktop\SuperLongInt\source\repos\WideInt\x64\Release\SuperLongInt.exe

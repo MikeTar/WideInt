@@ -1,0 +1,14 @@
+﻿  WideNumType.cpp
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(54): warning C4240: нестандартное расширение: уровень доступа "wint::reminder" теперь задан как "private", но ранее он был определен как "public"
+  c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(23): note:  см. объявление "wint::reminder"
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\widenumtype.cpp(81): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\widenumtype.cpp(92): warning C4267: =: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\widenumtype.cpp(190): warning C4805: |: небезопасное смешение типа "char" и типа "bool" в операции
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\widenumtype.cpp(211): warning C4805: |: небезопасное смешение типа "char" и типа "bool" в операции
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\widenumtype.cpp(231): warning C4805: |: небезопасное смешение типа "char" и типа "bool" в операции
+  WideNums.cpp
+c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(54): warning C4240: нестандартное расширение: уровень доступа "wint::reminder" теперь задан как "private", но ранее он был определен как "public"
+  c:\users\miket\desktop\superlongint\source\repos\wideint\superlongint\wideint.h(23): note:  см. объявление "wint::reminder"
+  Создание кода...
+  SuperLongInt.vcxproj -> C:\Users\miket\Desktop\SuperLongInt\source\repos\WideInt\x64\Debug\SuperLongInt.exe
+  SuperLongInt.vcxproj -> C:\Users\miket\Desktop\SuperLongInt\source\repos\WideInt\x64\Debug\SuperLongInt.pdb (Partial PDB)
